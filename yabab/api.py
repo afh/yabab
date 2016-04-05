@@ -85,5 +85,5 @@ def account_transactions(account_number):
     account = Account.query.filter_by(number=account_number).first()
     if not account:
         return error("No account with number {} found".format(account_number), 404)
-    transactions = Transaction.query.filter_by(originator=account.id).all()
+    transactions = Transaction.query.filter_by(originator=account.id).order_by('datetime').all()
     return jsonify({"account_number": account.number, "transactions": transactions})
