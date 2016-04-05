@@ -15,6 +15,12 @@ def error(message, status=200):
     data = {"status": "error", "reason": message}
     return jsonify(data), status
 
+def check_required_params(params, data):
+    for param in params:
+        result = check_required_param(param, data)
+        if result:
+            return result
+
 def check_required_param(param, data):
     """Check if `data` contains mandatory parameter `param`"""
     if not data:

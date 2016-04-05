@@ -31,16 +31,22 @@ def accounts(account_number):
 
 def create_account(data):
     """Creates a new account for a customer identified by customer_id"""
-    result = check_required_param('customer_id', data)
+    mandatory_params = ['customer_id', 'initial_deposit']
+    result = check_required_params(mandatory_params, data)
     if result:
         return result
 
-    customer = Customer.query.filter_by(id=customer_id).first()
+    customer = Customer.query.filter_by(id=data['customer_id']).first()
     if not customer:
-        return error("No customer with id {} found".format(customer_id), 404)
+        return error("No customer with id {} found".format(data['customer_id']), 404)
 
     new_account = Account(customer.id)
     db.session.add(new_account)
+    db.session.commit()
+
+    ## NOTE: It seems odd to have the new_account.id as both the originator and the beneficiary here
+    new_transaction = Transaction(new_account.id, new_account.id, 'Initial Deposit', data['initial_deposit'])
+    db.session.add(new_transaction)
     db.session.commit()
 
     return jsonify({"account_number": new_account.number}), 201
@@ -53,10 +59,9 @@ def show_balance(account_number):
 def create_transaction():
     data = get_data(request)
     mandatory_params = ['amount', 'reference', 'originator', 'beneficiary']
-    for param in mandatory_params:
-        result = check_required_param(param, data)
-        if result:
-            return result
+    result = check_required_params(mandatory_params, data)
+    if result:
+        return result
 
     (originator, error) = get_account('originator', data)
     if error:
