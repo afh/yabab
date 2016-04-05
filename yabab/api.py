@@ -57,7 +57,13 @@ def create_account(data):
     return jsonify({"account_number": new_account.number}), 201
 
 def show_balance(account_number):
-    return jsonify({"balance": "Balance for {}".format(account_number)})
+    account = Account.query.filter_by(number=account_number).first()
+    if not account:
+        return error("No account with number {} found".format(account_number), 404)
+
+    transactions = Transaction.query.filter_by(originator=account.id).order_by('datetime').all()
+    balance = float(sum([t.amount for t in transactions]))
+    return jsonify({"balance": balance})
 
 
 @mod.route('/transactions', methods=['POST'])
