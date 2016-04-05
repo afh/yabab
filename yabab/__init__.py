@@ -14,7 +14,7 @@ __version__ = "0.0.1"
 __license__ = "MIT"
 __copyright__ = "Copyright 2016, Alexis Hildebrandt"
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask.json import JSONEncoder
 from flask.ext.sqlalchemy import SQLAlchemy
 app = Flask(__name__)
@@ -40,5 +40,9 @@ def api_redirect():
 @app.errorhandler(404)
 def page_not_found(error):
     return jsonify({'error': 'The requested API endpoint does not exist'}), 404
+
+@app.errorhandler(405)
+def method_not_allowd(error):
+    return jsonify({'error': 'The requested HTTP method {} is not allowed for {}'.format(request.method, request.path)}), 405
 
 from . import blueprints
