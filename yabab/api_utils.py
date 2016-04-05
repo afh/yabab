@@ -16,6 +16,7 @@ def error(message, status=200):
     return jsonify(data), status
 
 def check_required_params(params, data):
+    """Check if `data` contains list of mandatory parameters `params`"""
     for param in params:
         result = check_required_param(param, data)
         if result:
@@ -39,6 +40,7 @@ def get_account(param, data):
     return (account, None)
 
 def validate_amount(param, data):
+    """Validate that param in data is a representation of a positive decimal number"""
     try:
         numeric_amount = float(data[param])
     except ValueError:
