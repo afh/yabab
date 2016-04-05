@@ -80,8 +80,13 @@ def create_transaction():
     if error:
         return error
 
-    return jsonify({"transaction": new_transaction.id}), 201
+    originator_transaction = Transaction(originator.id, beneficiary.id, data['reference'], -amount)
+    beneficiary_transaction = Transaction(beneficiary.id, originator.id, data['reference'], amount)
+    db.session.add(originator_transaction)
+    db.session.add(beneficiary_transaction)
+    db.session.commit()
 
+    return jsonify({"transaction": originator_transaction.id}), 201
 
 
 @mod.route('/accounts/<account_number>/transactions', methods=['GET'])
