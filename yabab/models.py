@@ -1,3 +1,5 @@
+import random
+
 from . import db
 
 class Customer(db.Model):
@@ -11,8 +13,25 @@ class Account(db.Model):
     __tablename__ = 'accounts'
 
     id = db.Column(db.Integer, primary_key=True)
-    number = db.Column(db.String())
+    number = db.Column(db.String(), unique=True)
     customer = db.Column(db.Integer, db.ForeignKey('{}.id'.format(Customer.__tablename__)))
+
+    def __init__(self, customer):
+        self.number = self.new_account_number()
+        self.customer = customer
+
+    # TODO: Find a possibility to ensure account_number uniqueness
+    #       without querying the database
+    def new_account_number(self):
+        while True:
+            new_account_number = Account.generate_account_number()
+            account = Account.query.filter_by(number=new_account_number).first()
+            if not account:
+                return new_account_number
+
+    @classmethod
+    def generate_account_number(cls):
+        return '{:0>10}'.format(random.randint(1000000, 999999999))
 
 
 class Transaction(db.Model):
