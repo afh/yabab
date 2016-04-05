@@ -4,25 +4,56 @@ A backend banking API for the fictional YaBaB Savings Bank.
 
 ## TL;DR
 
-0. Requirements:
+### Testing the deployed application
 
-    * [Homebrew](http://brew.sh)
-    * [Python 3.5](https://www.python.org)
+* Access the application deployed at [http://yabab.herokuapp.com/api](http://yabab.herokuapp.com/api) according to [Specification](#apidesign) below:
+
+        % export API_HOST=http://yabab.herokuapp.com/
+        ## Retrieve API information
+        % curl -sL ${API_HOST}/api | json_reformat
+        {
+          "message": "Welcome to the YaBaB API",
+          "version": "v0.0.1"
+        }
+        ## Retrieve balance for account 0821788037 
+        % curl -sL ${API_HOST}api/accounts/0821788037 | json_reformat
+        {
+          "balance": 600.0
+        }
+        ## Create new account with initial deposit of ¤2,000.00 for customer with id 1
+        % curl -sL -XPOST -F'customer_id=1' -F'initial_deposit=2000.00' ${API_HOST}api/accounts | json_reformat
+        {
+          "account_number": "0384723632"
+        }
+        ## Create new transaction from account 0738654399 to account 0821788037 with an amount of ¤100.00 and the payment reference "Reimbursement"
+        % curl -sL -XPOST -H'Content-Type: application/json' -d'{"amount":100.00, "reference":"Reimbursement", "beneficiary":"0821788037", "originator":"0738654399"}' ${API_HOST}/api/transactions
+        {
+          "transaction": 10
+        }
+
+
+### Running locally
+
+0. Necessary Prerequisites:
+
+    * [Homebrew](http://brew.sh) (only when on Mac OS X)
+    * [Python 3.5](https://www.python.org) `% brew install python3`
+    * [PostgreSQL](http://www.postgresql.org) `% brew cask install postgres`
+    * [yajl](https://lloyd.github.io/yajl/) (optional) `% brew install yajl`
 
 * Setup a Python 3.5 virtual environment to run the application using:
 
         % pyvenv ~/Library/Python/YaBaB
         % source ~/Library/Python/YaBaB/bin/activate
 
+* Configure your environment to install and run the application:
+
+        % export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/latest/bin
+        % export DATABASE_URL='postgresql://localhost/yabab'
+
 * Install the needed requirements with:
 
         % pip install -r requirements.txt
-        % brew cask install postgres
-
-      Note that when running on Mac OS X using the [Postgres.app](http://postgresapp.com/)
-      it is necessary to set the `PATH` variable, so that the `pg_config` and
-      `psql` program is found during `pip install -r requirements.txt`, e.g.:
-      `export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/lates/bin`.
 
 * Create, initialize, and pre-populate the database named `yabab`:
 
@@ -36,17 +67,18 @@ A backend banking API for the fictional YaBaB Savings Bank.
 
         % heroku local
 
-    or [gunicorn](https://toolbelt.heroku.com):
+    or [gunicorn](http://gunicorn.org)
 
-        % DATABASE_URL='postgresql://localhost/yabab' gunicorn -c gunicorn_conf.py yabab:app
+        % gunicorn -c gunicorn_conf.py yabab:app
 
 * Access the application according to [Specification](#apidesign) below:
 
-        % curl -sL http://localhost:5000/ | json_reformat
+        % export API_HOST=http://localhost:500
+        % curl -sL ${API_HOST}/api | json_reformat
         {
-        "yabab.api": "v0.0.1"
+          "message": "Welcome to the YaBaB API",
+          "version": "v0.0.1"
         }
-
 
 
 ## Database Design
@@ -86,7 +118,7 @@ A backend banking API for the fictional YaBaB Savings Bank.
 ||`404`|A customer with `customer_id` does not exist
 |Response JSON|||
 ||`201`|`{"account_number": "1234567890"}`
-||`404`|`{"status": "error", "reason": "Invalid customer id customer_id"}`
+||`404`|`{"status": "error", "reason": "No customer with id customer_id found"}`
 
 |Transfer amounts between any two accounts|||
 |---|---|---|
@@ -117,7 +149,7 @@ A backend banking API for the fictional YaBaB Savings Bank.
 ||`404`|An account with `account_number` does not exist
 |Response JSON|||
 ||`200`|`{"amount": 1234.56}`
-||`404`|`{"status": "error", "reason": "Invalid account number :account_number"}`
+||`404`|`{"status": "error", "reason": "No account with number :account_number found"}`
 
 |Retrieve transfer history for a given account|||
 |---|---|---|
@@ -129,5 +161,5 @@ A backend banking API for the fictional YaBaB Savings Bank.
 ||`200`|An account with `account_number` was found and its transactions are returned in the response
 ||`404`|An account with `account_number` does not exist
 |Response JSON|||
-||`200`|`{"account_number": "1234567890", "transactions": [{"date": "2016-04-05", "amount": 1000.00", "reference": "Initial deposit", "?"] }`
-||`404`|`{"status": "error", "reason": "Invalid account number :account_number"}`
+||`200`|`{"account_number": "1234567890", "transactions": [{"date": "2016-04-05", "amount": 1000.00", "reference": "Initial deposit", "originator": "1234567890", "beneficiary": "0987654321"] }`
+||`404`|`{"status": "error", "reason": "No account with number :account_number found"}`

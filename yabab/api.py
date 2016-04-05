@@ -8,7 +8,9 @@ from .api_utils import *
 
 mod = Blueprint('api', __name__)
 
-
+###########################################################################
+# api_info
+###########################################################################
 @mod.route('/')
 def api_info():
     response = {'message': 'Welcome to the YaBaB API',
@@ -16,6 +18,9 @@ def api_info():
     return jsonify(response)
 
 
+###########################################################################
+# /accounts
+###########################################################################
 @mod.route('/accounts',
            methods=['POST', 'GET'],
            defaults={'account_number': None})
@@ -56,6 +61,7 @@ def create_account(data):
     return jsonify({"account_number": new_account.number}), 201
 
 def show_balance(account_number):
+    """Show the current balance of an account identified by account_number"""
     account = Account.query.filter_by(number=account_number).first()
     if not account:
         return error("No account with number {} found".format(account_number), 404)
@@ -64,9 +70,25 @@ def show_balance(account_number):
     balance = float(sum([t.amount for t in transactions]))
     return jsonify({"balance": balance})
 
+@mod.route('/accounts/<account_number>/transactions', methods=['GET'])
+def account_transactions(account_number):
+    """List transactions for account identified by account_number"""
+    account = Account.query.filter_by(number=account_number).first()
+    if not account:
+        return error("No account with number {} found".format(account_number), 404)
+    transactions = Transaction.query.filter_by(originator=account.id).order_by('datetime').all()
+    return jsonify({"account_number": account.number, "transactions": transactions})
 
+
+###########################################################################
+# /transactions
+###########################################################################
 @mod.route('/transactions', methods=['POST'])
 def create_transaction():
+    """Create a new transaction.
+    For every request to this API endpoint two Transaction database entries
+    are made in order to have some sort of double entry bookkeeping.
+    """
     data = get_data(request)
     mandatory_params = ['amount', 'reference', 'originator', 'beneficiary']
     result = check_required_params(mandatory_params, data)
@@ -91,13 +113,6 @@ def create_transaction():
     db.session.add(beneficiary_transaction)
     db.session.commit()
 
+    # NOTE: Would it be confusing if the identifiers of both created transactions would be returned?
     return jsonify({"transaction": originator_transaction.id}), 201
 
-
-@mod.route('/accounts/<account_number>/transactions', methods=['GET'])
-def account_transactions(account_number):
-    account = Account.query.filter_by(number=account_number).first()
-    if not account:
-        return error("No account with number {} found".format(account_number), 404)
-    transactions = Transaction.query.filter_by(originator=account.id).order_by('datetime').all()
-    return jsonify({"account_number": account.number, "transactions": transactions})
