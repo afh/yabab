@@ -15,7 +15,10 @@ __license__ = "MIT"
 __copyright__ = "Copyright 2016, Alexis Hildebrandt"
 
 from flask import Flask
+from flask.ext.sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.config.from_object('app_conf')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 from . import blueprints

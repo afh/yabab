@@ -1,2 +1,5 @@
+import os
+
 DEBUG = True
 TEMPLATES_AUTO_RELOAD = True
+SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']

@@ -4,24 +4,43 @@ A backend banking API for the fictional YaBaB Savings Bank.
 
 ## TL;DR
 
-1. Setup a [Python 3.5](https://www.python.org) virtual environment to run the application using:
+0. Requirements:
+
+    * [Homebrew](http://brew.sh)
+    * [Python 3.5](https://www.python.org)
+
+* Setup a Python 3.5 virtual environment to run the application using:
 
         % pyvenv ~/Library/Python/YaBaB
         % source ~/Library/Python/YaBaB/bin/activate
 
-2. Install the needed requirements with:
+* Install the needed requirements with:
 
         % pip install -r requirements.txt
+        % brew cask install postgres
 
-3. Run the application locally using [heroku-toolbelt](https://toolbelt.heroku.com):
+      Note that when running on Mac OS X using the [Postgres.app](http://postgresapp.com/)
+      it is necessary to set the `PATH` variable, so that the `pg_config` and
+      `psql` program is found during `pip install -r requirements.txt`, e.g.:
+      `export PATH=$PATH:/Applications/Postgres.app/Contents/Versions/lates/bin`.
+
+* Create, initialize, and pre-populate the database named `yabab`:
+
+        % psql < db.sql
+        % python manage.py db init
+        % python manage.py db migrate
+        % python manage.py db update
+        % psql < pre-populate.sql
+
+* Run the application locally using [heroku-toolbelt](https://toolbelt.heroku.com):
 
         % heroku local
 
     or [gunicorn](https://toolbelt.heroku.com):
 
-        % gunicorn -c gunicorn_conf.py yabab:app
+        % DATABASE_URL='postgresql://localhost/yabab' gunicorn -c gunicorn_conf.py yabab:app
 
-4. Access the application according to [Specification](#apidesign) below:
+* Access the application according to [Specification](#apidesign) below:
 
         % curl -sL http://localhost:5000/ | json_reformat
         {
