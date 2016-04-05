@@ -44,9 +44,9 @@ def create_account(data):
     db.session.add(new_account)
     db.session.commit()
 
-    (amount, error) = validate_amount('initial_deposit', data)
-    if error:
-        return error
+    (amount, reject) = validate_amount('initial_deposit', data)
+    if reject:
+        return reject
 
     ## NOTE: It seems odd to have the new_account.id as both the originator and the beneficiary here
     new_transaction = Transaction(new_account.id, new_account.id, 'Initial Deposit', amount)
@@ -73,17 +73,17 @@ def create_transaction():
     if result:
         return result
 
-    (originator, error) = get_account('originator', data)
-    if error:
-        return error
+    (originator, reject) = get_account('originator', data)
+    if reject:
+        return reject
 
-    (beneficiary, error) = get_account('beneficiary', data)
-    if error:
-        return error
+    (beneficiary, reject) = get_account('beneficiary', data)
+    if reject:
+        return reject
 
-    (amount, error) = validate_amount('amount', data)
-    if error:
-        return error
+    (amount, reject) = validate_amount('amount', data)
+    if reject:
+        return reject
 
     originator_transaction = Transaction(originator.id, beneficiary.id, data['reference'], -amount)
     beneficiary_transaction = Transaction(beneficiary.id, originator.id, data['reference'], amount)
