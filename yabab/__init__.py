@@ -33,4 +33,8 @@ app.json_encoder = CustomJSONEncoder
 
 db = SQLAlchemy(app)
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return jsonify({'error': 'The requested API endpoint does not exist'}), 404
+
 from . import blueprints
