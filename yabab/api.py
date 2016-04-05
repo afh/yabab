@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 from flask import Blueprint, Response, jsonify, request, current_app
 
 from . import db, __version__
@@ -81,4 +82,8 @@ def create_transaction():
 
 @mod.route('/accounts/<account_number>/transactions', methods=['GET'])
 def account_transactions(account_number):
-    return jsonify({"account_number": account_number, "transactions": []})
+    account = Account.query.filter_by(number=account_number).first()
+    if not account:
+        return error("No account with number {} found".format(account_number), 404)
+    transactions = Transaction.query.filter_by(originator=account.id).all()
+    return jsonify({"account_number": account.number, "transactions": transactions})
