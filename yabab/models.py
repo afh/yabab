@@ -38,7 +38,14 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
 
     id = db.Column(db.Integer, primary_key=True)
+    datetime = db.Column(db.DateTime, default=db.func.now())
     originator = db.Column(db.Integer, db.ForeignKey('{}.id'.format(Account.__tablename__)))
     beneficiary = db.Column(db.Integer, db.ForeignKey('{}.id'.format(Account.__tablename__)))
     reference = db.Column(db.String())
     amount = db.Column(db.Numeric)
+
+    def __init__(self, originator, beneficiary, reference, amount):
+        self.originator = originator
+        self.beneficiary = beneficiary
+        self.reference = reference
+        self.amount = amount

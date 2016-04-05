@@ -3,20 +3,10 @@ from flask import Blueprint, Response, jsonify, request, current_app
 
 from . import db, __version__
 from .models import Customer, Account, Transaction
+from .api_utils import *
 
 mod = Blueprint('api', __name__)
 
-def get_data(request):
-    """Get data from request either from form-data or json body"""
-    data = request.form
-    if not data:
-        data = request.get_json()
-    return data
-
-def error(message, status=200):
-    """Wrap an error message in a response JSON"""
-    data = {"status": "error", "reason": message}
-    return jsonify(data), status
 
 @mod.route('/')
 def root():
@@ -41,16 +31,15 @@ def accounts(account_number):
 
 def create_account(data):
     """Creates a new account for a customer identified by customer_id"""
-    try:
-        customer_id = data['customer_id']
-    except KeyError:
-        return error("Missing mandatory parameter customer_id")
+    result = check_required_param('customer_id', data)
+    if result:
+        return result
 
     customer = Customer.query.filter_by(id=customer_id).first()
     if not customer:
         return error("No customer with id {} found".format(customer_id), 404)
 
-    new_account = Account(customer_id)
+    new_account = Account(customer.id)
     db.session.add(new_account)
     db.session.commit()
 
@@ -58,3 +47,33 @@ def create_account(data):
 
 def show_balance(account_number):
     return jsonify({"balance": "Balance for {}".format(account_number)})
+
+
+@mod.route('/transactions', methods=['POST'])
+def create_transaction():
+    data = get_data(request)
+    mandatory_params = ['amount', 'reference', 'originator', 'beneficiary']
+    for param in mandatory_params:
+        result = check_required_param(param, data)
+        if result:
+            return result
+
+    (originator, error) = get_account('originator', data)
+    if error:
+        return error
+
+    (beneficiary, error) = get_account('beneficiary', data)
+    if error:
+        return error
+
+    new_transaction = Transaction(originator.id, beneficiary.id, data['reference'], data['amount'])
+    db.session.add(new_transaction)
+    db.session.commit()
+
+    return jsonify({"transaction": new_transaction.id}), 201
+
+
+
+@mod.route('/accounts/<account_number>/transactions', methods=['GET'])
+def account_transactions(account_number):
+    return jsonify({"account_number": account_number, "transactions": []})

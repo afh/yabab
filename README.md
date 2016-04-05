@@ -103,7 +103,7 @@ A backend banking API for the fictional YaBaB Savings Bank.
 ||`404`|An originator or beneficiary account with account_number does not exist
 |Response JSON|||
 ||`201`|`{"transaction_id": "13243546"}`
-||`200`|`{"status": "error", "Amount exceeds transaction limit"}`
+||`200`|`{"status": "error", "reason": "Amount exceeds transaction limit"}`
 ||`404`|`{"status": "error", "reason": "Invalid originator account number :account_number"}`
 
 |Retrieve balances for a given account|||
@@ -121,7 +121,7 @@ A backend banking API for the fictional YaBaB Savings Bank.
 
 |Retrieve transfer history for a given account|||
 |---|---|---|
-|URL|`/transactions/:account_number`||
+|URL|`/account/:account_number/transactions`||
 |Method|`GET`||
 |Request Parameters|||
 ||*None*||
