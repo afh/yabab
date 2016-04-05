@@ -32,7 +32,11 @@ def accounts(account_number):
     elif request.method == 'GET' and account_number:
         return show_balance(account_number)
     else:
-        return error("Error processing {} request for account number {}".format(request.method, account_number))
+        return list_accounts()
+
+def list_accounts():
+    accounts = Account.query.all()
+    return jsonify({"accounts": accounts})
 
 def create_account(data):
     """Creates a new account for a customer identified by customer_id"""

@@ -162,4 +162,14 @@ A backend banking API for the fictional YaBaB Savings Bank.
 ||`404`|An account with `account_number` does not exist
 |Response JSON|||
 ||`200`|`{"account_number": "1234567890", "transactions": [{"date": "2016-04-05", "amount": 1000.00", "reference": "Initial deposit", "originator": "1234567890", "beneficiary": "0987654321"] }`
-||`404`|`{"status": "error", "reason": "No account with number :account_number found"}`
+
+|List available accounts|||
+|---|---|---|
+|URL|`/accounts`||
+|Method|`GET`||
+|Request Parameters|||
+||`None`||
+|Response Codes|||
+||`200`|The list of available accounts is returned
+|Response JSON|||
+||`200`|`{"accounts": [{"customer": "Jane Woods", "customer_id": 1, "id": 5, number:"1234567890"}]}`

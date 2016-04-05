@@ -33,6 +33,14 @@ class Account(db.Model):
     def generate_account_number(cls):
         return '{:0>10}'.format(random.randint(1000000, 999999999))
 
+    def to_JSON(self):
+        customer = Customer.query.get(self.customer)
+        return {"id": self.id,
+                "number": self.number,
+                "customer": customer.name,
+                "customer_id": customer.id,
+               }
+
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'
