@@ -39,7 +39,7 @@ def get_account(param, data):
         return (None, error("Invalid {} account number {}".format(param, data[param])))
     return (account, None)
 
-def validate_amount(param, data):
+def numeric_amount(param, data):
     """Validate that param in data is a representation of a positive decimal number"""
     try:
         numeric_amount = float(data[param])

@@ -44,7 +44,7 @@ def create_account(data):
     db.session.add(new_account)
     db.session.commit()
 
-    (amount, reject) = validate_amount('initial_deposit', data)
+    (amount, reject) = numeric_amount('initial_deposit', data)
     if reject:
         return reject
 
@@ -81,7 +81,7 @@ def create_transaction():
     if reject:
         return reject
 
-    (amount, reject) = validate_amount('amount', data)
+    (amount, reject) = numeric_amount('amount', data)
     if reject:
         return reject
 
