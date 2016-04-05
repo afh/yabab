@@ -49,3 +49,13 @@ class Transaction(db.Model):
         self.beneficiary = beneficiary
         self.reference = reference
         self.amount = amount
+
+    def to_JSON(self):
+        originator = Account.query.get(self.originator)
+        beneficiary = Account.query.get(self.beneficiary)
+        return {"id": self.id,
+                "date": self.datetime.strftime('%Y-%m-%d'),
+                "originator": originator.number,
+                "beneficiary": beneficiary.number,
+                "amount": float(self.amount)
+               }
