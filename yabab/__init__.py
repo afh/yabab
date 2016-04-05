@@ -14,7 +14,7 @@ __version__ = "0.0.1"
 __license__ = "MIT"
 __copyright__ = "Copyright 2016, Alexis Hildebrandt"
 
-from flask import Flask, jsonify, current_app
+from flask import Flask, jsonify
 from flask.json import JSONEncoder
 from flask.ext.sqlalchemy import SQLAlchemy
 app = Flask(__name__)
@@ -32,6 +32,10 @@ app.json_encoder = CustomJSONEncoder
 
 
 db = SQLAlchemy(app)
+
+@app.route('/')
+def api_redirect():
+    return jsonify({'message': 'The API is available at {}'.format(url_for('api.api_info'))})
 
 @app.errorhandler(404)
 def page_not_found(error):
