@@ -45,8 +45,12 @@ def create_account(data):
     db.session.add(new_account)
     db.session.commit()
 
+    (amount, error) = validate_amount('initial_deposit', data)
+    if error:
+        return error
+
     ## NOTE: It seems odd to have the new_account.id as both the originator and the beneficiary here
-    new_transaction = Transaction(new_account.id, new_account.id, 'Initial Deposit', data['initial_deposit'])
+    new_transaction = Transaction(new_account.id, new_account.id, 'Initial Deposit', amount)
     db.session.add(new_transaction)
     db.session.commit()
 
@@ -72,9 +76,9 @@ def create_transaction():
     if error:
         return error
 
-    new_transaction = Transaction(originator.id, beneficiary.id, data['reference'], data['amount'])
-    db.session.add(new_transaction)
-    db.session.commit()
+    (amount, error) = validate_amount('amount', data)
+    if error:
+        return error
 
     return jsonify({"transaction": new_transaction.id}), 201
 

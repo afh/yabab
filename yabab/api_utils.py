@@ -38,3 +38,11 @@ def get_account(param, data):
         return (None, error("Invalid {} account number {}".format(param, data[param])))
     return (account, None)
 
+def validate_amount(param, data):
+    try:
+        numeric_amount = float(data[param])
+    except ValueError:
+        return (None, error("Invalid {} specified: {}. Must be a decimal number, e.g. 123.45.".format(param, data[param]), 400))
+    if numeric_amount < 0:
+        return (None, error("{} must be a positive decimal number.".format(param, data[param]), 400))
+    return (numeric_amount, None)
