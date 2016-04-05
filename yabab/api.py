@@ -10,10 +10,9 @@ mod = Blueprint('api', __name__)
 
 
 @mod.route('/')
-def root():
-    result = db.session.query(Customer).first()
-    current_app.logger.debug(result.name)
-    response = {__name__: "v{}".format(__version__)}
+def api_info():
+    response = {'message': 'Welcome to the YaBaB API',
+                'version': 'v{}'.format(__version__)}
     return jsonify(response)
 
 
